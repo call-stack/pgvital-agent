@@ -3,6 +3,7 @@ package collector
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -38,6 +39,29 @@ func (c *Collector) Collect(ctx context.Context) (*Snapshot, error) {
 		return nil, fmt.Errorf("indexes: %w", err)
 	}
 	snap.Indexes = indexes
+
+	// Lock and activity collection is best-effort — the monitoring user
+	// may not have access to pg_stat_activity or pg_locks.
+	locks, err := collectLocks(ctx, c.pool)
+	if err != nil {
+		slog.Warn("lock collection failed (non-fatal)", "err", err)
+	} else {
+		snap.Locks = locks
+	}
+
+	activities, err := collectActivity(ctx, c.pool)
+	if err != nil {
+		slog.Warn("activity collection failed (non-fatal)", "err", err)
+	} else {
+		snap.Activities = activities
+	}
+
+	deadlocks, err := collectDeadlocks(ctx, c.pool)
+	if err != nil {
+		slog.Warn("deadlock collection failed (non-fatal)", "err", err)
+	} else {
+		snap.Deadlocks = deadlocks
+	}
 
 	return snap, nil
 }
