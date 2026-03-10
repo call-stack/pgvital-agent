@@ -9,6 +9,9 @@ type Snapshot struct {
 	Statements   []StatementEntry `json:"statements"`
 	Tables       []TableEntry     `json:"tables"`
 	Indexes      []IndexEntry     `json:"indexes"`
+	Locks        []LockEntry      `json:"locks"`
+	Activities   []ActivityEntry  `json:"activities"`
+	Deadlocks    int64            `json:"deadlocks"`
 	AgentVersion string           `json:"agent_version"`
 }
 
@@ -44,11 +47,28 @@ type TableEntry struct {
 }
 
 type IndexEntry struct {
-	SchemaName    string `json:"schema_name"`
-	TableName     string `json:"table_name"`
-	IndexName     string `json:"index_name"`
-	IdxScan       int64  `json:"idx_scan"`
-	IdxTupRead    int64  `json:"idx_tup_read"`
-	IdxTupFetch   int64  `json:"idx_tup_fetch"`
-	IndexSizeBytes int64 `json:"index_size_bytes"`
+	SchemaName     string `json:"schema_name"`
+	TableName      string `json:"table_name"`
+	IndexName      string `json:"index_name"`
+	IdxScan        int64  `json:"idx_scan"`
+	IdxTupRead     int64  `json:"idx_tup_read"`
+	IdxTupFetch    int64  `json:"idx_tup_fetch"`
+	IndexSizeBytes int64  `json:"index_size_bytes"`
+}
+
+type LockEntry struct {
+	BlockedPID      int32   `json:"blocked_pid"`
+	BlockedQuery    string  `json:"blocked_query"`
+	BlockingPID     int32   `json:"blocking_pid"`
+	BlockingQuery   string  `json:"blocking_query"`
+	BlockingState   string  `json:"blocking_state"`
+	LockedTable     string  `json:"locked_table"`
+	LockMode        string  `json:"lock_mode"`
+	WaitDurationSec float64 `json:"wait_duration_seconds"`
+}
+
+type ActivityEntry struct {
+	WaitEventType string `json:"wait_event_type"`
+	WaitEvent     string `json:"wait_event"`
+	Count         int64  `json:"count"`
 }
