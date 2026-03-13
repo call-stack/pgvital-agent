@@ -15,7 +15,7 @@ func collectLocks(ctx context.Context, pool *pgxpool.Pool) ([]LockEntry, error) 
 			blocking_activity.pid,
 			blocking_activity.query,
 			COALESCE(blocking_activity.state, 'unknown'),
-			COALESCE(blocked_locks.relation::regclass::text, ''),
+			COALESCE(blocked_locks.relation::regclass::text, blocked_locks.locktype),
 			blocked_locks.mode,
 			EXTRACT(EPOCH FROM (now() - blocked_activity.query_start))
 		FROM pg_locks blocked_locks
